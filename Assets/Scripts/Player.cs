@@ -6,14 +6,15 @@ using UnityEngine.Serialization;
 public class Player : MonoBehaviour
 {
     // Variables
-    [SerializeField]
-    private float speed = 5f;
-    [SerializeField]
-    private float jumpSpeed = 10f;
-    [SerializeField]
-    private Rigidbody body;
-
     private Vector3 startPosition = new (0f, 0f, 0f);
+    private float movementSpeed = 5f;
+    private float jumpSpeed = 10f;
+    private float firingCooldown = 0.5f;
+    private float nextFiringTime = 0f;
+    
+    [SerializeField] private Rigidbody body;
+    [SerializeField] private GameObject projectilePrefab;
+    
     
     void Start()
     {
@@ -24,6 +25,13 @@ public class Player : MonoBehaviour
     void Update()
     {
         PlayerMovement();
+        
+        // Shoot projectile
+        if (Input.GetKeyDown(KeyCode.E) && nextFiringTime < Time.time)
+        {
+            Instantiate(projectilePrefab, transform.position + new Vector3(0f, 1f, 0f), Quaternion.identity);
+            nextFiringTime = Time.time + firingCooldown;
+        }
     }
 
     void PlayerMovement()
@@ -36,11 +44,11 @@ public class Player : MonoBehaviour
         
         // Horizontal movement via key input
         float horizontalInput = Input.GetAxis("Horizontal");
-        transform.Translate(Time.deltaTime * speed * horizontalInput * Vector3.right);
+        transform.Translate(Time.deltaTime * movementSpeed * horizontalInput * Vector3.right);
 
         // Upwards movement (jumping) on space bar key press
         // Constraint: only allow movement once previous jump has finished
-        if (Input.GetKeyDown("space") && body.velocity.y == 0)
+        if (Input.GetKeyDown(KeyCode.Space) && body.velocity.y == 0)
         {
             body.velocity += new Vector3(0f, jumpSpeed, 0f);
         }
